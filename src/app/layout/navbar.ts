@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { gsap } from 'gsap';
 
@@ -96,7 +96,7 @@ import { gsap } from 'gsap';
   `],
 })
 export class Navbar implements AfterViewInit {
-  constructor(private elementRef: ElementRef) {}
+  private elementRef = inject(ElementRef);
 
   ngAfterViewInit() {
     gsap.from(this.elementRef.nativeElement.querySelector('.navbar'), {

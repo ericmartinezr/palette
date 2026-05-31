@@ -1,4 +1,4 @@
-import { Component, input, effect, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, input, computed, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { gsap } from 'gsap';
 import { GradientConfig } from '../models/types';
 import { ColorService } from '../services/color.service';
@@ -26,15 +26,10 @@ import { ColorService } from '../services/color.service';
 })
 export class GradientPreview implements AfterViewInit {
   config = input.required<GradientConfig>();
-  protected bgStyle: () => string;
+  protected bgStyle = computed(() => this.colorService.gradientCss(this.config()));
   private anim: gsap.core.Tween | null = null;
-
-  constructor(
-    private colorService: ColorService,
-    private elementRef: ElementRef,
-  ) {
-    this.bgStyle = () => this.colorService.gradientCss(this.config());
-  }
+  private colorService = inject(ColorService);
+  private elementRef = inject(ElementRef);
 
   ngAfterViewInit() {
     const el = this.elementRef.nativeElement.querySelector('.preview') as HTMLElement;

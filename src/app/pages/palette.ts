@@ -1,4 +1,4 @@
-import { Component, signal, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, signal, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { gsap } from 'gsap';
 import { ColorService } from '../services/color.service';
 import { StorageService } from '../services/storage.service';
@@ -21,6 +21,8 @@ import { ColorCard } from '../components/color-card';
             class="type-btn"
             [class.active]="t === selectedType()"
             (click)="selectType(t)"
+            [attr.aria-label]="'Armonía ' + PALETTE_TYPE_LABELS[t]"
+            [attr.aria-pressed]="t === selectedType()"
           >
             {{ PALETTE_TYPE_LABELS[t] }}
           </button>
@@ -28,13 +30,13 @@ import { ColorCard } from '../components/color-card';
       </div>
 
       <div class="actions-bar">
-        <button class="btn primary" (click)="generate()">
+        <button class="btn primary" (click)="generate()" aria-label="Generar paleta">
           ✦ Generar
         </button>
-        <button class="btn secondary" (click)="randomize()">
+        <button class="btn secondary" (click)="randomize()" aria-label="Paleta aleatoria">
           🎲 Aleatorio
         </button>
-        <button class="btn save" (click)="save()">
+        <button class="btn save" (click)="save()" aria-label="Guardar paleta">
           💾 Guardar
         </button>
       </div>
@@ -167,11 +169,8 @@ export class Palette implements AfterViewInit {
   selectedType = signal<PaletteType>('analogous');
   colors = signal<string[]>([]);
   savedMessage = signal('');
-
-  constructor(
-    private colorService: ColorService,
-    private storage: StorageService,
-  ) {}
+  private colorService = inject(ColorService);
+  private storage = inject(StorageService);
 
   ngAfterViewInit() {
     this.generate();

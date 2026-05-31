@@ -1,4 +1,4 @@
-import { Component, input, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, input, output, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { gsap } from 'gsap';
 
 @Component({
@@ -8,6 +8,9 @@ import { gsap } from 'gsap';
       class="card"
       [style.background]="color()"
       (click)="copyColor()"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="'Copiar color ' + color()"
       #card
     >
       <div class="overlay">
@@ -66,9 +69,9 @@ export class ColorCard implements AfterViewInit {
   color = input.required<string>();
   index = input(0);
   copied = false;
+  colorCopied = output<string>();
   private el!: HTMLElement;
-
-  constructor(private elementRef: ElementRef) {}
+  private elementRef = inject(ElementRef);
 
   ngAfterViewInit() {
     this.el = this.elementRef.nativeElement.querySelector('.card')!;
@@ -86,6 +89,7 @@ export class ColorCard implements AfterViewInit {
     try {
       await navigator.clipboard.writeText(this.color());
       this.copied = true;
+      this.colorCopied.emit(this.color());
       setTimeout(() => (this.copied = false), 1200);
     } catch {
       // fallback

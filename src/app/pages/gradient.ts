@@ -1,4 +1,4 @@
-import { Component, signal, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, signal, computed, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { gsap } from 'gsap';
 import { FormsModule } from '@angular/forms';
 import { ColorService } from '../services/color.service';
@@ -30,14 +30,18 @@ import { GradientPreview } from '../components/gradient-preview';
         <div class="controls-section">
           <div class="control-group">
             <label class="label">Tipo</label>
-            <div class="toggle">
+            <div class="toggle" role="radiogroup" aria-label="Tipo de gradiente">
               <button
                 [class.active]="config().type === 'linear'"
                 (click)="setType('linear')"
+                role="radio"
+                [attr.aria-checked]="config().type === 'linear'"
               >Lineal</button>
               <button
                 [class.active]="config().type === 'radial'"
                 (click)="setType('radial')"
+                role="radio"
+                [attr.aria-checked]="config().type === 'radial'"
               >Radial</button>
             </div>
           </div>
@@ -54,6 +58,7 @@ import { GradientPreview } from '../components/gradient-preview';
                 [ngModel]="config().angle"
                 (ngModelChange)="setAngle($event)"
                 class="slider"
+                aria-label="Ángulo del gradiente"
               />
             </div>
           }
@@ -71,26 +76,28 @@ import { GradientPreview } from '../components/gradient-preview';
                   />
                   <div class="stop-info">
                     <span class="stop-hex">{{ s.color }}</span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      [ngModel]="s.offset"
-                      (ngModelChange)="updateStop(idx, 'offset', $event)"
-                      class="slider small"
-                    />
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        [ngModel]="s.offset"
+                        (ngModelChange)="updateStop(idx, 'offset', $event)"
+                        class="slider small"
+                        [attr.aria-label]="'Posición de ' + s.color"
+                      />
                     <span class="stop-offset">{{ s.offset }}%</span>
                   </div>
                   @if (config().stops.length > 2) {
                     <button
                       class="remove-stop"
                       (click)="removeStop(idx)"
+                      [attr.aria-label]="'Eliminar parada ' + s.color"
                     >✕</button>
                   }
                 </div>
               }
             </div>
-            <button class="add-stop" (click)="addStop()">+ Añadir color</button>
+            <button class="add-stop" (click)="addStop()" aria-label="Añadir parada de color">+ Añadir color</button>
           </div>
         </div>
       </div>
@@ -304,9 +311,8 @@ export class Gradient implements AfterViewInit {
   config = signal<GradientConfig>({ type: 'linear', angle: 135, stops: [] });
   copied = false;
 
-  protected cssOutput = () => this.colorService.gradientCss(this.config());
-
-  constructor(private colorService: ColorService) {}
+  protected cssOutput = computed(() => this.colorService.gradientCss(this.config()));
+  private colorService = inject(ColorService);
 
   ngAfterViewInit() {
     this.config.set(this.colorService.defaultGradient());

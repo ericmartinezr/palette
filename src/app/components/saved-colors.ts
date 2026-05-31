@@ -1,4 +1,4 @@
-import { Component, signal, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, signal, output, AfterViewInit, ElementRef, inject } from '@angular/core';
 import { gsap } from 'gsap';
 import { ColorPalette } from '../models/types';
 import { StorageService } from '../services/storage.service';
@@ -22,10 +22,10 @@ import { StorageService } from '../services/storage.service';
             </div>
             <div class="mini-colors">
               @for (c of p.colors; track c) {
-                <span class="mini-dot" [style.background]="c"></span>
+                <span class="mini-dot" [style.background]="c" [attr.aria-label]="c"></span>
               }
             </div>
-            <button class="delete-btn" (click)="removePalette(p.id)">✕</button>
+            <button class="delete-btn" (click)="removePalette(p.id)" [attr.aria-label]="'Eliminar ' + p.name">✕</button>
           </div>
         }
       </div>
@@ -112,8 +112,10 @@ import { StorageService } from '../services/storage.service';
 })
 export class SavedColors implements AfterViewInit {
   palettes = signal<ColorPalette[]>([]);
+  paletteDeleted = output<string>();
+  private storage = inject(StorageService);
 
-  constructor(private storage: StorageService) {
+  constructor() {
     this.palettes.set(this.storage.getPalettes());
   }
 
@@ -129,5 +131,6 @@ export class SavedColors implements AfterViewInit {
   removePalette(id: string) {
     this.storage.deletePalette(id);
     this.palettes.set(this.storage.getPalettes());
+    this.paletteDeleted.emit(id);
   }
 }
